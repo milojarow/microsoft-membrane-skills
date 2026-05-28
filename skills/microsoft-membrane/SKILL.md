@@ -85,6 +85,10 @@ membrane action run --connectionId=$CONN <action_id> --json [--input '{"key":"va
 
 Only when no action covers the case → fall back to the proxy (see [reference/graph-api-patterns.md](reference/graph-api-patterns.md)).
 
+**If `action list` returns nothing for your intent**, try broadening the natural-language phrase first (`"send"` instead of `"send email with attachment"`). If still empty after broadening, your connection may lack the required Graph scope — re-run `membrane connect` and accept ALL scopes in the browser flow, then retry. As a last resort, drop to the proxy and call the Graph endpoint directly.
+
+**Microsoft Graph rate limits** apply to both actions and proxy calls — Graph throttles per-app and per-user. In tight loops, expect `429 Too Many Requests` with a `Retry-After` header (in seconds). Respect it; don't retry sooner. For batch operations, prefer the `$batch` endpoint or a pre-built bulk action over a hot loop of single calls.
+
 ## Quick reference
 
 | Want to… | Command |

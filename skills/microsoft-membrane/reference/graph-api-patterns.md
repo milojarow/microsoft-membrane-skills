@@ -181,6 +181,8 @@ membrane request "$CONN" '/me/todo/lists/<listId>/tasks' \
 
 ## Pagination
 
+### Proxy responses
+
 Graph paginates with `@odata.nextLink` in the response:
 
 ```bash
@@ -197,7 +199,18 @@ PATH_ONLY="${NEXT#https://graph.microsoft.com/v1.0}"
 membrane request "$CONN" "$PATH_ONLY"
 ```
 
-Pre-built actions handle this automatically — another reason to prefer them when one exists.
+### Pre-built actions
+
+Pre-built actions handle pagination automatically — most return all results, transparently following `nextLink` server-side, and present a flat list to you. If a list-style action ever exposes paging at the CLI level, it'll show up as parameters in the `inputSchema` (look for `cursor`, `nextPageToken`, `pageSize` keys when you run `action list --intent="…" --json`). That's another reason to prefer actions when one exists.
+
+## Rate limits / throttling
+
+Microsoft Graph throttles both proxy calls and actions:
+
+- Per-user and per-app limits apply. Hot loops will hit `429 Too Many Requests`.
+- Response includes a `Retry-After` header (seconds). Wait at least that long before retrying — do NOT retry sooner, it resets the cooldown.
+- For batch reads/writes, prefer Graph's `$batch` endpoint (up to 20 requests per call) over a hot loop of singletons.
+- For automation, sleep briefly between proxy calls (`sleep 1` is usually enough for non-tight loops) and consider exponential backoff on 429.
 
 ## Gotchas
 
