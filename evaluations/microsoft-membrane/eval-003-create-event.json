@@ -1,0 +1,16 @@
+{
+  "id": "microsoft-membrane-003",
+  "skills": ["microsoft-membrane"],
+  "query": "Create a 30-minute calendar event tomorrow at 3pm in my timezone titled \"Sync with Alice\" with alice@example.com as a required attendee.",
+  "expected_behavior": [
+    "activate the microsoft-membrane skill",
+    "try `membrane action list --intent=\"create calendar event\" --connectionId=$CONN --json` first",
+    "fallback to proxy: `membrane request $CONN '/me/events' -X POST --json -d '<payload>'`",
+    "the payload includes subject, start (dateTime + timeZone), end, attendees array",
+    "confirm the proposed event with the user before executing (destructive op — visible to the attendee)",
+    "ask for or use a sensible timeZone (e.g. America/Mexico_City) if not specified"
+  ],
+  "expected_content": ["membrane action list", "/me/events", "-X POST", "subject", "start", "end", "attendees", "timeZone"],
+  "priority": "high",
+  "notes": "Guards the create-event flow with proper TZ handling AND the discipline of confirming visible-to-others ops."
+}

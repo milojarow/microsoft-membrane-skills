@@ -1,0 +1,17 @@
+{
+  "id": "microsoft-membrane-004",
+  "skills": ["microsoft-membrane"],
+  "query": "I'm on a remote Linux VM (SSH only, no browser) and want to use membrane to talk to my personal Outlook. I don't have anything installed yet. Walk me through it.",
+  "expected_behavior": [
+    "activate the microsoft-membrane skill",
+    "point to `reference/installation.md`",
+    "install: `npm install -g @membranehq/cli` (requires Node 18+)",
+    "verify: `membrane --version`",
+    "first login (headless variant): `membrane login --tenant` prints a URL → user opens it on another device → completes with `membrane login complete <code>`",
+    "then create the Outlook connection (point at `reference/connections.md`)",
+    "verify: `membrane connection list --json`"
+  ],
+  "expected_content": ["npm install -g @membranehq/cli", "Node 18", "membrane login --tenant", "membrane login complete", "headless", "reference/installation.md", "reference/connections.md"],
+  "priority": "high",
+  "notes": "Critical for transferability — the install + headless login + connection bootstrap must be reachable from SKILL.md in ≤1 cross-link."
+}

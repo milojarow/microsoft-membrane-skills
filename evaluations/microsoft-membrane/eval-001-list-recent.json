@@ -1,0 +1,15 @@
+{
+  "id": "microsoft-membrane-001",
+  "skills": ["microsoft-membrane"],
+  "query": "Show me the 10 most recent emails in my Outlook inbox.",
+  "expected_behavior": [
+    "activate the microsoft-membrane skill",
+    "FIRST try `membrane action list --intent=\"list recent emails\" --connectionId=$CONN --json` to discover a pre-built action",
+    "OR if going straight to the proxy, use `membrane request $CONN '/me/messages?$top=10&$select=subject,from,receivedDateTime'`",
+    "explain WHY action-list-first is preferred (pagination + field mapping handled)",
+    "if the user doesn't have $CONN set, point at `connection list` to find the connectionId"
+  ],
+  "expected_content": ["membrane action list", "--intent", "membrane request", "$top=10", "$select", "/me/messages"],
+  "priority": "high",
+  "notes": "Guards the discover-before-build principle AND tests that the Graph API path is findable for the fallback case."
+}

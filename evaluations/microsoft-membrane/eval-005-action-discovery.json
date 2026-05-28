@@ -1,0 +1,16 @@
+{
+  "id": "microsoft-membrane-005",
+  "skills": ["microsoft-membrane"],
+  "query": "I want to send an email from my Outlook account. Should I just `membrane request` the /me/sendMail endpoint?",
+  "expected_behavior": [
+    "activate the microsoft-membrane skill",
+    "PUSH BACK on going straight to the proxy",
+    "recommend `membrane action list --intent=\"send email\" --connectionId=$CONN --json` first",
+    "explain that pre-built actions handle the JSON shape, pagination, attachment uploads, and error mapping that hand-rolling /me/sendMail does not",
+    "if no action turns up, THEN fall back to `membrane request $CONN '/me/sendMail' -X POST --json -d '<payload>'`",
+    "confirm the proposed send with the user before executing"
+  ],
+  "expected_content": ["action list", "--intent", "pre-built", "/me/sendMail", "fall back", "discover"],
+  "priority": "high",
+  "notes": "Guards the core discover-before-build principle. If the skill happily proxies without trying action discovery, it's leaning on the wrong default."
+}

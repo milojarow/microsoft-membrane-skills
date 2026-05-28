@@ -1,0 +1,16 @@
+{
+  "id": "microsoft-membrane-002",
+  "skills": ["microsoft-membrane"],
+  "query": "Find all emails in my Outlook that contain the word \"invoice\" in subject or body.",
+  "expected_behavior": [
+    "activate the microsoft-membrane skill",
+    "try `membrane action list --intent=\"search inbox\" --connectionId=$CONN --json` first to find an action",
+    "fallback to proxy: `membrane request $CONN '/me/messages?$search=\"invoice\"&$top=20&$select=subject,from,receivedDateTime'`",
+    "note that `$search` is full-text (matches subject + body)",
+    "warn that `$search` does NOT combine with `$orderby` or `$filter` on this resource (Graph returns 400)",
+    "cross-link to `reference/graph-api-patterns.md` for the search detail"
+  ],
+  "expected_content": ["$search", "membrane request", "/me/messages", "$top", "reference/graph-api-patterns.md"],
+  "priority": "high",
+  "notes": "Guards the $search vs $filter/$orderby Graph API gotcha and the proxy-as-fallback pattern."
+}
