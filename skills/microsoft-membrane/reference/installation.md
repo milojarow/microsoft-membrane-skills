@@ -72,7 +72,7 @@ Re-run `membrane --version` to confirm.
 
 ## Troubleshooting
 
-- **`command not found: membrane`** — the npm global bin directory isn't on `$PATH`. Find it with `npm bin -g` and add that to `$PATH`.
+- **`command not found: membrane`** — the npm global bin directory isn't on `$PATH`. Find it with `npm prefix -g` (the global bin dir is `$(npm prefix -g)/bin`) and add that to `$PATH`.
 - **`Error: certificate has expired`** during install — `npm`'s root CAs are out of date; `npm install -g npm@latest` to refresh.
 - **`auth error` / `not logged in` after `login` seemed to work** — clear the cached creds (`rm -rf ~/.config/membrane/` or equivalent) and try again. Make sure you didn't pick the wrong membrane account during the browser flow.
 - **No `--tenant` flag** — for personal Outlook/Hotmail accounts on the consumer tenant, `--tenant` may not be required. Try without it first; add it back if the login complains.

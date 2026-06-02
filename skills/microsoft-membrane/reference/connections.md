@@ -56,13 +56,13 @@ membrane connection list --json | jq -r '.items[] | select(.email == "you@outloo
 
 ## Reconnect / rotate
 
-If a connection expires or is revoked (user revoked access in Microsoft's account settings, password changed, etc.), the next action call will fail with an auth error. To recover:
+If a connection expires or is revoked (user revoked access in Microsoft's account settings, password changed, etc.), the next action call will fail with an auth error. To recover, create a fresh connection:
 
 ```bash
-# Delete the stale connection (membrane CLI may expose `connection delete <id>` — check `membrane connection --help`)
-# OR just create a new connection and use the new connectionId
 membrane connect --connectorId="$CONNECTOR_ID" --json
 ```
+
+Whether the membrane CLI exposes a way to delete the stale connection first (e.g. a `connection delete <id>` subcommand) should be checked with `membrane connection --help`. If no delete command is available, recovery is simply creating a fresh connection (above) and using the new connectionId.
 
 The new connection may have a different `connectionId`. Long-running scripts should resolve the connectionId dynamically via `connection list` rather than hardcoding it.
 
@@ -82,10 +82,10 @@ membrane request "$CONN_WORK"     '/me/messages?$top=5&$select=subject'
 
 - **OAuth refresh is automatic** — membrane refreshes the access token before it expires. You don't need to do anything.
 - **A connection is per-membrane-account** — if you log out of membrane (`membrane logout` or clearing creds), connections survive in membrane's server-side state and re-appear on next login.
-- **Revocation outside membrane** — if the user revokes the CLI's access from Microsoft's side (account.microsoft.com → Privacy → App permissions), the next call fails with an auth error. Recovery: re-run `membrane connect`.
+- **Revocation outside membrane** — if the user revokes the CLI's access from Microsoft's side (account.microsoft.com → Privacy → App permissions), the next call fails with an auth error. Recovery: re-run `membrane connect --connectorId="$CONNECTOR_ID"`.
 
 ## Troubleshooting
 
 - **`Connection not found`** — wrong connectionId, or it was deleted. Run `connection list` to confirm.
-- **`unauthorized` / `auth refresh failed`** — the OAuth token can't be refreshed. Most common cause: user revoked from Microsoft's side. Run `membrane connect` to make a new one.
-- **`scope not granted`** — the connection was created with fewer scopes than the action needs. Re-run `membrane connect`; in the browser approval, accept all requested scopes.
+- **`unauthorized` / `auth refresh failed`** — the OAuth token can't be refreshed. Most common cause: user revoked from Microsoft's side. Run `membrane connect --connectorId="$CONNECTOR_ID"` to make a new one.
+- **`scope not granted`** — the connection was created with fewer scopes than the action needs. Re-run `membrane connect --connectorId="$CONNECTOR_ID"`; in the browser approval, accept all requested scopes.
