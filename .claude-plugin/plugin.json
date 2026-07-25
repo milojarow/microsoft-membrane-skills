@@ -1,6 +1,6 @@
 {
   "name": "microsoft-membrane-skills",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Drive Microsoft Outlook (email, calendar, contacts, tasks) via the `membrane` CLI proxy to Microsoft Graph — install, login, connection setup, action discovery, pre-built action runs, and raw Graph API proxy requests with auto-refreshed credentials.",
   "author": {
     "name": "milojarow",

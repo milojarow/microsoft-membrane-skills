@@ -21,6 +21,14 @@ Drive Microsoft Outlook (email, calendar, contacts, tasks) by proxying the Micro
 
 The discipline: **discover an action first, fall back to proxy only when nothing fits.**
 
+## ⚠️ `membrane request` is deprecated and currently 503s — read this first
+
+The proxy layer prints a deprecation notice and then fails with **503**, while the connection itself reports healthy (`connected: true`, `state: READY`, `errors: []`). The subcommand is broken, not the integration.
+
+**The failure mode is silent and looks like success.** The error body is valid JSON that echoes the request back, with no `value` key — so a parser doing `d.get('value', [])` reports **"0 messages"**. A transport failure reads as an empty inbox. **If an account that normally has traffic returns 0, re-run with no filters; if it's still 0, the instrument is broken, not the mailbox.** (The error output also prints the full bearer token — never paste it into logs or tickets.)
+
+**Use `action run` for everything**, including cases you'd previously have proxied. Payload lands at **`.output.data.value`** (not `.value`), and `/me/messages` already spans all folders. Full recipe: [reference/graph-api-patterns.md](reference/graph-api-patterns.md).
+
 ## When to use
 
 - Reading recent / search-by-keyword Outlook email from the terminal.
@@ -63,7 +71,8 @@ If membrane isn't installed or you haven't logged in yet, see [reference/install
    └──┬───────────────┬──────────┘
       │ yes           │ no
       ▼               ▼
-   action run     proxy request to /me/...
+   action run     broaden the intent and look again —
+                  the proxy is deprecated and 503s
                   → reference/graph-api-patterns.md
 ```
 
@@ -99,7 +108,7 @@ Only when no action covers the case → fall back to the proxy (see [reference/g
 | List existing connections | `membrane connection list --json` |
 | Discover actions | `membrane action list --intent="..." --connectionId=$CONN --json` |
 | Run an action | `membrane action run --connectionId=$CONN <action_id> --json [--input '{"k":"v"}']` |
-| Raw Graph API | `membrane request $CONN /me/messages?$top=10` |
+| Raw Graph API | `membrane request $CONN /me/messages?$top=10` — **deprecated, 503s; use `action run`** |
 
 For full connection lifecycle (create, list, reconnect after rotation): [reference/connections.md](reference/connections.md).
 For Graph API patterns (mailFolders, $search, $select, calendar, contacts, To-Do tasks) and the proxy flag table: [reference/graph-api-patterns.md](reference/graph-api-patterns.md).
@@ -112,4 +121,6 @@ For Graph API patterns (mailFolders, $search, $select, calendar, contacts, To-Do
 - **Hardcoding a connectionId that has rotated** — after re-auth, the connectionId may change. Use `connection list` at the top of long-running scripts to resolve it dynamically.
 - **Omitting `--tenant` on `membrane login`** for work/school multi-tenant accounts — login can fail in unhelpful ways.
 - **Passing `--input` JSON with shell-unfriendly quoting** — wrap the whole payload in single quotes and use double quotes inside, OR pass it via a heredoc to a file and `--inputFile`.
-- **Forgetting that `request` URLs need URL-encoded query params** — `$select=subject` and `$search="keyword"` work but watch the quoting.
+- **Forgetting that `request` URLs need URL-encoded query params** — `$select=subject` and `$search="keyword"` work but watch the quoting. (Moot while `request` is deprecated — pass OData params in the action's `--input` instead.)
+- **Reading `.value` off an `action run` response** — the payload is at `.output.data.value`. Reading `.value` yields nothing and looks like an empty mailbox.
+- **Trusting a "0 messages" result** — on a connection that normally has traffic, zero means "verify the transport", not "the inbox is empty". Re-query with no filters before reporting it.

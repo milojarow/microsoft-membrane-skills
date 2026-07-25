@@ -1,6 +1,54 @@
 # Microsoft Graph API patterns via membrane's proxy
 
-Use the proxy only when **no pre-built action covers your case**. For most everyday operations, `membrane action list --intent="…"` returns an action with pagination + field mapping already handled.
+> ## ⚠️ `membrane request` is DEPRECATED and currently returns 503
+>
+> The proxy subcommand prints a deprecation notice and then fails:
+>
+> ```
+> DEPRECATED: 'membrane request' — will be removed in a future release.
+> Error making request to https://graph.microsoft.com/v1.0/me/messages: 503
+> ```
+>
+> The connection itself is healthy (`membrane connection list` → `connected: true`, `state: READY`, `errors: []`) and credentials refresh normally. **It's the subcommand that's broken, not the integration.**
+>
+> **Why this is dangerous, not just annoying.** The error body is *valid JSON* containing only an echo of the request:
+>
+> ```json
+> { "data": { "request": { "method": "GET", "url": "...", "query": {...}, "headers": {...} } } }
+> ```
+>
+> A parser doing `d['value']` or `d.get('value', [])` gets an **empty list** and reports **"0 messages"**. A transport failure disguises itself as a clean inbox — in a mail sweep, that means declaring an account empty when it holds dozens of messages.
+>
+> **Alarm signal:** if an account that normally has traffic returns 0, **re-run the query with no filters at all**. If it still returns 0, the instrument is broken — this is not an absence of data.
+>
+> **Also:** the error output prints the `Authorization` header with the full bearer token. Never paste that output into logs or tickets.
+>
+> **Use `action run` instead** — see the section below. The patterns in the rest of this file remain accurate as *Graph semantics* (paths, OData parameters, response shapes); only the `membrane request` transport is dead. Read them as documentation of what to pass to an action's OData parameters.
+
+## The working route: `action run`
+
+The connector's pre-built actions keep operating normally against the same Graph API.
+
+```bash
+# Discover the action id (stable across connections of the same connector)
+membrane action list --intent="list email messages" --connectionId=<CONN> --json
+
+# List messages — payload arrives in .output.data.value
+membrane action run --connectionId=<CONN> <ACTION_ID> --json --input '{
+  "$top": 300,
+  "$filter": "receivedDateTime ge 2026-07-13T00:00:00Z",
+  "$orderby": "receivedDateTime desc",
+  "$select": "subject,from,receivedDateTime,bodyPreview"
+}'
+```
+
+- **The response shape changes.** With `action run` the payload sits at **`.output.data.value`**, not `.value`. `.output.status` carries the real HTTP status.
+- **The same `ACTION_ID` works for every connection of that connector** — multiple Microsoft accounts share action ids.
+- The "List Messages" action accepts the full OData parameter set (`$top`, `$skip`, `$filter`, `$search`, `$orderby`, `$select`), so nothing is lost relative to the raw request.
+- **`/me/messages` covers ALL folders** in the mailbox — no need to iterate `mailFolders`.
+- **`bodyPreview`** (~255 chars) is usually enough to read transactional alerts (bank notifications and the like) without pulling full bodies. For the whole body there's a "Get Message" action — **watch the parameter name**: try `{"messageId": "<id>"}` and `{"id": "<id>"}`, it varies by connector version, and the wrong one returns an error with no parseable JSON.
+
+## The proxy command (deprecated — kept for reference)
 
 The proxy command:
 
