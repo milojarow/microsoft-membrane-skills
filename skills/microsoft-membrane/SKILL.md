@@ -1,13 +1,13 @@
 ---
 name: microsoft-membrane
-description: Use when reading or modifying Microsoft Outlook data (email, calendar, contacts, tasks) from the terminal via the `membrane` CLI's microsoft-outlook connector — installing membrane, logging in, creating/listing connections, discovering and running pre-built actions, or sending raw Microsoft Graph API requests through membrane's proxy with auto-refreshed credentials.
+description: Use when reading or modifying Microsoft Outlook data (email, calendar, contacts, tasks) from the terminal via the `membrane` CLI's microsoft-outlook connector — installing membrane, logging in, creating/listing connections, discovering and running pre-built actions, or reaching Microsoft Graph endpoints (the raw `membrane request` proxy is deprecated and 503s, so Graph calls go through `action run`).
 ---
 
 # Microsoft Outlook via membrane
 
 Drive Microsoft Outlook (email, calendar, contacts, tasks) by proxying the Microsoft Graph API through the [membrane](https://getmembrane.com) CLI. Membrane handles OAuth and token refresh transparently — you never see API keys.
 
-> **📬 ACTIVE-SKILL MARKER:** While `microsoft-membrane` is active, begin every reply with 📬 so the operator sees at a glance that this skill is engaged. Do not omit it.
+> **📬 ACTIVE-SKILL MARKER:** While `microsoft-membrane` is active, begin every reply with 📬 so the operator sees at a glance that this skill is engaged.
 
 ## Overview
 
